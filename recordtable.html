@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Riwayat Data Sensor</title>
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(to right, #00c6ff, #0072ff);
+        color: white;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      th {
+        background-color: #0c6980;
+        color: white;
+        padding: 15px;
+      }
+      td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+        color: white;
+      }
+      .led-box {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 2px solid #fff;
+      }
+      .back-button {
+        background-color: #ff9800;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .back-button:hover {
+        background-color: #e68900;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="text-center mb-3">
+        <h2><i class="fas fa-history"></i> Riwayat Data Sensor</h2>
+      </div>
+      <button class="back-button mb-3" onclick="window.location.href='index.html'">
+        <i class="fas fa-arrow-left"></i> Kembali
+      </button>
+      <div class="table-container">
+        <table id="recordTable" class="table table-bordered">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Timestamp</th>
+              <th>Jarak Ultrasonik</th>
+              <th>Sensor IR</th>
+              <th>Servo Position</th>
+              <th>WS2812B LED</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Data dari Firebase akan diisi di sini -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDkQLvtt9p7ulGX6TvAtw-ZfUsq6jwbN3g",
+        authDomain: "pwiotpert5.firebaseapp.com",
+        databaseURL: "https://pwiotpert5-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "pwiotpert5",
+        storageBucket: "pwiotpert5.firebasestorage.app",
+        messagingSenderId: "871315096940",
+        appId: "1:871315096940:web:c9de772e29b9bd66431f49",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+
+      function formatTimestamp(timestamp) {
+        const date = new Date(parseInt(timestamp));
+        return date.toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
+      }
+
+      function loadRecordData() {
+        const recordRef = database.ref("records");
+        recordRef.on("value", (snapshot) => {
+          const records = snapshot.val();
+          const tableBody = document.getElementById("tableBody");
+          tableBody.innerHTML = "";
+
+          let number = 1;
+          for (const key in records) {
+            const record = records[key];
+            const timestamp = formatTimestamp(key);
+            const row = `
+              <tr>
+                <td>${number}</td>
+                <td>${timestamp}</td>
+                <td>${record.distance} cm</td>
+                <td>${record.ir_status}</td>
+                <td>${record.servo_position}°</td>
+                <td>
+                  <div class="led-box" style="background-color: ${record.led_color};"></div>
+                </td>
+              </tr>
+            `;
+            tableBody.innerHTML += row;
+            number++;
+          }
+        });
+      }
+      window.onload = loadRecordData;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monitoring Sensor & Aktuator</title>
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(to right, #00c6ff, #0072ff);
+        color: white;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .status-badge {
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: bold;
+      }
+      .status-on {
+        background-color: #28a745;
+        color: white;
+      }
+      .status-off {
+        background-color: #dc3545;
+        color: white;
+      }
+      .led-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 2px solid #fff;
+        transition: background-color 0.5s ease-in-out;
+      }
+      .card {
+        transition: transform 0.3s;
+      }
+      .card:hover {
+        transform: scale(1.05);
+      }
+      .btn-primary {
+        background-color: #ff9800;
+        border-color: #ff9800;
+      }
+      .btn-primary:hover {
+        background-color: #e68900;
+        border-color: #e68900;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5 text-center">
+      <h2 class="mb-4">🌐 Sistem Monitoring Sensor & Aktuator</h2>
+      <h5 id="timestamp">Loading timestamp...</h5>
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card text-center text-dark">
+            <div class="card-header bg-info text-white">Jarak Ultrasonik</div>
+            <div class="card-body">
+              <h3 id="distanceValue">Loading...</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center text-dark">
+            <div class="card-header bg-info text-white">Sensor IR</div>
+            <div class="card-body">
+              <h3 id="irValue">Loading...</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center text-dark">
+            <div class="card-header bg-info text-white">Servo Position</div>
+            <div class="card-body">
+              <h3 id="servoValue">Loading...</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center text-dark">
+            <div class="card-header bg-info text-white">WS2812B LED</div>
+            <div class="card-body">
+              <div id="ledStatus" class="led-box"></div>
+              <h3 id="ledColor">Loading...</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <button class="btn btn-primary btn-lg" onclick="window.location.href='recordtable.html'">
+          <i class="fas fa-history"></i> Lihat Riwayat Data
+        </button>
+      </div>
+    </div>
+
+   <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDkQLvtt9p7ulGX6TvAtw-ZfUsq6jwbN3g",
+        authDomain: "pwiotpert5.firebaseapp.com",
+        databaseURL: "https://pwiotpert5-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "pwiotpert5",
+        storageBucket: "pwiotpert5.firebasestorage.app",
+        messagingSenderId: "871315096940",
+        appId: "1:871315096940:web:c9de772e29b9bd66431f49",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+
+      function formatTimestamp(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
+      }
+
+      database.ref("records").orderByKey().limitToLast(1).on("child_added", (snapshot) => {
+        const data = snapshot.val();
+        const timestamp = formatTimestamp(parseInt(snapshot.key));
+        document.getElementById("timestamp").innerHTML = Last Update: ${timestamp};
+        document.getElementById("distanceValue").innerHTML = ${data.distance} cm;
+        document.getElementById("irValue").innerHTML = data.ir_status;
+        document.getElementById("servoValue").innerHTML = ${data.servo_position}°;
+        document.getElementById("ledColor").innerHTML = data.led_color;
+        document.getElementById("ledStatus").style.backgroundColor = data.led_color;
+      });
+    </script>
+  </body>
+</html>
